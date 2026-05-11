@@ -23,7 +23,18 @@
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#0A0A0A"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_MEDIA_VISUAL_USER_SELECTED",
+        "android.permission.ACCESS_MEDIA_LOCATION",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO",
+        "android.permission.READ_MEDIA_AUDIO"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -55,7 +66,11 @@
       "expo-web-browser"
     ],
     "extra": {
-      "apiUrl": "https://xocmldcvhkwr3gsvbfkyz-preview-4200.runable.site/"
+      "apiUrl": "https://xocmldcvhkwr3gsvbfkyz-preview-4200.runable.site/",
+      "router": {},
+      "eas": {
+        "projectId": "07005c4d-0810-4f12-ad77-13b9c7820197"
+      }
     }
   }
 }
