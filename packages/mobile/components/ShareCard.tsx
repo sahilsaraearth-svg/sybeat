@@ -12,19 +12,13 @@ import { LinearGradient } from "expo-linear-gradient";
 import { X, ShareNetwork, Download } from "phosphor-react-native";
 import * as Haptics from "expo-haptics";
 import type { YouTubeTrack } from "../lib/youtube";
-import ViewShot, { type ViewShotRef } from "react-native-view-shot";
+import ViewShot from "react-native-view-shot";
+type ViewShotRef = InstanceType<typeof ViewShot>;
 import * as Sharing from "expo-sharing";
 import * as MediaLibrary from "expo-media-library";
 import { toast } from "./Toast";
 
-const C = {
-  bg: "#09090B",
-  indigo: "#6366F1",
-  indigoDark: "#4F46E5",
-  text: "#FAFAFA",
-  textMuted: "#A1A1AA",
-  zinc800: "#27272A",
-};
+
 
 interface Props {
   visible: boolean;
@@ -102,7 +96,7 @@ export default function ShareCard({ visible, onClose, track }: Props) {
           <View style={s.header}>
             <Text style={s.headerTitle}>Share Track</Text>
             <TouchableOpacity style={s.closeBtn} onPress={onClose}>
-              <X size={16} color={C.text} />
+              <X size={16} color={"#FAFAFA"} />
             </TouchableOpacity>
           </View>
 
@@ -148,7 +142,7 @@ export default function ShareCard({ visible, onClose, track }: Props) {
 
               {/* Branding — always inside ViewShot bounds */}
               <View style={s.cardBrand}>
-                <LinearGradient colors={[C.indigo, C.indigoDark]} style={s.brandIcon}>
+                <LinearGradient colors={["#6366F1", "#4F46E5"]} style={s.brandIcon}>
                   <Text style={s.brandIconText}>S</Text>
                 </LinearGradient>
                 <Text style={s.brandName}>sybeat</Text>
@@ -160,8 +154,8 @@ export default function ShareCard({ visible, onClose, track }: Props) {
           <View style={s.actions}>
             <TouchableOpacity style={s.actionBtn} onPress={handleSave} disabled={sharing}>
               {sharing
-                ? <ActivityIndicator size="small" color={C.textMuted} />
-                : <Download size={20} color={C.text} />}
+                ? <ActivityIndicator size="small" color={"#A1A1AA"} />
+                : <Download size={20} color={"#FAFAFA"} />}
               <Text style={s.actionText}>Save</Text>
             </TouchableOpacity>
             <TouchableOpacity style={[s.actionBtn, s.actionBtnPrimary]} onPress={handleShare} disabled={sharing}>
@@ -198,7 +192,7 @@ const s = StyleSheet.create({
     paddingHorizontal: 20, paddingVertical: 16,
     borderBottomWidth: 1, borderBottomColor: "rgba(63,63,70,0.3)",
   },
-  headerTitle: { fontSize: 16, fontWeight: "700", color: C.text },
+  headerTitle: { fontSize: 16, fontWeight: "700", color: "#FAFAFA" },
   closeBtn: {
     width: 30, height: 30, borderRadius: 9,
     backgroundColor: "rgba(63,63,70,0.4)", alignItems: "center", justifyContent: "center",
@@ -227,10 +221,10 @@ const s = StyleSheet.create({
     paddingHorizontal: 20, marginTop: 14, alignItems: "center", width: "100%",
   },
   cardTitle: {
-    fontSize: 15, fontWeight: "800", color: C.text, textAlign: "center",
+    fontSize: 15, fontWeight: "800", color: "#FAFAFA", textAlign: "center",
     letterSpacing: -0.3, lineHeight: 19,
   },
-  cardArtist: { fontSize: 12, color: C.textMuted, marginTop: 5, textAlign: "center" },
+  cardArtist: { fontSize: 12, color: "#A1A1AA", marginTop: 5, textAlign: "center" },
   cardAlbum: { fontSize: 11, color: "#52525B", marginTop: 3, textAlign: "center" },
 
   cardWave: {
@@ -247,7 +241,7 @@ const s = StyleSheet.create({
     alignItems: "center", justifyContent: "center",
   },
   brandIconText: { fontSize: 13, fontWeight: "900", color: "#fff" },
-  brandName: { fontSize: 13, fontWeight: "800", color: C.textMuted, letterSpacing: 0.5 },
+  brandName: { fontSize: 13, fontWeight: "800", color: "#A1A1AA", letterSpacing: 0.5 },
 
   actions: {
     flexDirection: "row", gap: 10, padding: 16,
@@ -260,5 +254,5 @@ const s = StyleSheet.create({
     borderWidth: 1, borderColor: "rgba(63,63,70,0.4)",
   },
   actionBtnPrimary: { backgroundColor: "#6366F1", borderColor: "#6366F1" },
-  actionText: { fontSize: 14, fontWeight: "700", color: C.textMuted },
+  actionText: { fontSize: 14, fontWeight: "700", color: "#A1A1AA" },
 });

@@ -618,7 +618,22 @@ function makeStyles(C: ReturnType<typeof import("../../lib/colors").useColors>) 
   },
   detailTitle: { flex: 1, fontSize: 18, fontWeight: "800", color: C.text },
   detailCount: { fontSize: 13, color: C.muted },
-});
+  // stats tab
+  statTotalCard: { borderRadius: 18, padding: 20, alignItems: "center" as const, gap: 6 },
+  statTotalLabel: { fontSize: 13, color: "rgba(255,255,255,0.6)", fontWeight: "600" as const },
+  statTotalValue: { fontSize: 36, fontWeight: "800" as const, color: "#fff" },
+  statSectionTitle: { fontSize: 16, fontWeight: "700" as const, color: C.text, marginBottom: 10 },
+  statNoData: { fontSize: 14, color: C.muted, fontStyle: "italic" as const },
+  statRow: { flexDirection: "row" as const, alignItems: "center" as const, gap: 10, marginBottom: 12 },
+  statRank: { width: 20, fontSize: 13, fontWeight: "700" as const, color: C.muted, textAlign: "center" as const },
+  statThumb: { width: 42, height: 42, borderRadius: 8, backgroundColor: C.zinc800 },
+  statArtistAvatar: { width: 42, height: 42, borderRadius: 21, backgroundColor: C.zinc800, alignItems: "center" as const, justifyContent: "center" as const },
+  statArtistInitial: { fontSize: 18, fontWeight: "800" as const, color: C.indigo },
+  statInfo: { flex: 1 },
+  statTrackTitle: { fontSize: 13, fontWeight: "600" as const, color: C.text },
+  statTrackArtist: { fontSize: 12, color: C.muted, marginTop: 2 },
+  statPlays: { fontSize: 12, fontWeight: "700" as const, color: C.indigo },
+}); }
 
 const ov = StyleSheet.create({
   grid: {
@@ -652,19 +667,4 @@ const ov = StyleSheet.create({
     marginHorizontal: 16, marginBottom: 12, marginTop: 8,
   },
   shuffleText: { color: "#fff", fontWeight: "700", fontSize: 15 },
-  // stats
-  statTotalCard: { borderRadius: 18, padding: 20, alignItems: "center", gap: 6 },
-  statTotalLabel: { fontSize: 13, color: "rgba(255,255,255,0.6)", fontWeight: "600" },
-  statTotalValue: { fontSize: 36, fontWeight: "800", color: "#fff" },
-  statSectionTitle: { fontSize: 16, fontWeight: "700", color: C.text, marginBottom: 10 },
-  statNoData: { fontSize: 14, color: C.muted, fontStyle: "italic" },
-  statRow: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 12 },
-  statRank: { width: 20, fontSize: 13, fontWeight: "700", color: C.muted, textAlign: "center" },
-  statThumb: { width: 42, height: 42, borderRadius: 8, backgroundColor: C.zinc800 },
-  statArtistAvatar: { width: 42, height: 42, borderRadius: 21, backgroundColor: C.zinc800, alignItems: "center", justifyContent: "center" },
-  statArtistInitial: { fontSize: 18, fontWeight: "800", color: C.indigo },
-  statInfo: { flex: 1 },
-  statTrackTitle: { fontSize: 13, fontWeight: "600", color: C.text },
-  statTrackArtist: { fontSize: 12, color: C.muted, marginTop: 2 },
-  statPlays: { fontSize: 12, fontWeight: "700", color: C.indigo },
-}); }
+});

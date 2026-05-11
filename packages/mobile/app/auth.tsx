@@ -19,22 +19,7 @@ import { useAuthStore } from "../store/authStore";
 
 const { width: W } = Dimensions.get("window");
 
-const C = {
-  bg: "#09090B",
-  bg2: "#18181B",
-  zinc800: "#27272A",
-  zinc700: "#3F3F46",
-  zinc400: "#A1A1AA",
-  indigo: "#6366F1",
-  indigoDark: "#4F46E5",
-  indigoDim: "rgba(99,102,241,0.12)",
-  indigoBorder: "rgba(99,102,241,0.35)",
-  text: "#FAFAFA",
-  textMuted: "#A1A1AA",
-  border: "rgba(63,63,70,0.6)",
-  error: "#F43F5E",
-  success: "#22C55E",
-};
+
 
 type Mode = "login" | "register";
 type ResetStep = "email" | "otp" | "newpass";
@@ -127,7 +112,7 @@ export default function AuthScreen() {
           <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
             <ScrollView contentContainerStyle={s.scroll} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
               <View style={s.logoWrap}>
-                <LinearGradient colors={[C.indigo, C.indigoDark]} style={s.logoCircle}>
+                <LinearGradient colors={["#6366F1", "#4F46E5"]} style={s.logoCircle}>
                   <Headphones size={32} color="#fff" weight="fill" />
                 </LinearGradient>
                 <Text style={s.appName}>SyBeat</Text>
@@ -148,11 +133,11 @@ export default function AuthScreen() {
 
                 {resetStep === "email" && (
                   <View style={s.inputWrap}>
-                    <EnvelopeSimple size={18} color={C.zinc400} style={s.inputIcon} />
+                    <EnvelopeSimple size={18} color={"#A1A1AA"} style={s.inputIcon} />
                     <TextInput
                       style={s.input}
                       placeholder="Email address"
-                      placeholderTextColor={C.zinc400}
+                      placeholderTextColor={"#A1A1AA"}
                       value={resetEmail}
                       onChangeText={setResetEmail}
                       keyboardType="email-address"
@@ -167,7 +152,7 @@ export default function AuthScreen() {
                     <TextInput
                       style={[s.input, { letterSpacing: 8, fontSize: 20, textAlign: "center" }]}
                       placeholder="000000"
-                      placeholderTextColor={C.zinc400}
+                      placeholderTextColor={"#A1A1AA"}
                       value={otp}
                       onChangeText={setOtp}
                       keyboardType="number-pad"
@@ -178,17 +163,17 @@ export default function AuthScreen() {
 
                 {resetStep === "newpass" && (
                   <View style={s.inputWrap}>
-                    <Lock size={18} color={C.zinc400} style={s.inputIcon} />
+                    <Lock size={18} color={"#A1A1AA"} style={s.inputIcon} />
                     <TextInput
                       style={[s.input, { flex: 1 }]}
                       placeholder="New password"
-                      placeholderTextColor={C.zinc400}
+                      placeholderTextColor={"#A1A1AA"}
                       value={newPassword}
                       onChangeText={setNewPassword}
                       secureTextEntry={!showNewPw}
                     />
                     <TouchableOpacity onPress={() => setShowNewPw(!showNewPw)} style={s.eyeBtn}>
-                      {showNewPw ? <EyeSlash size={18} color={C.zinc400} /> : <Eye size={18} color={C.zinc400} />}
+                      {showNewPw ? <EyeSlash size={18} color={"#A1A1AA"} /> : <Eye size={18} color={"#A1A1AA"} />}
                     </TouchableOpacity>
                   </View>
                 )}
@@ -206,7 +191,7 @@ export default function AuthScreen() {
                   activeOpacity={0.85}
                   disabled={isLoading}
                 >
-                  <LinearGradient colors={[C.indigo, C.indigoDark]} style={StyleSheet.absoluteFillObject} />
+                  <LinearGradient colors={["#6366F1", "#4F46E5"]} style={StyleSheet.absoluteFillObject} />
                   {isLoading
                     ? <ActivityIndicator color="#fff" size="small" />
                     : <Text style={s.submitText}>
@@ -242,7 +227,7 @@ export default function AuthScreen() {
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
           <ScrollView contentContainerStyle={s.scroll} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
             <View style={s.logoWrap}>
-              <LinearGradient colors={[C.indigo, C.indigoDark]} style={s.logoCircle}>
+              <LinearGradient colors={["#6366F1", "#4F46E5"]} style={s.logoCircle}>
                 <Headphones size={32} color="#fff" weight="fill" />
               </LinearGradient>
               <Text style={s.appName}>SyBeat</Text>
@@ -264,21 +249,21 @@ export default function AuthScreen() {
 
               {mode === "register" && (
                 <View style={s.inputWrap}>
-                  <User size={18} color={C.zinc400} style={s.inputIcon} />
-                  <TextInput style={s.input} placeholder="Full name" placeholderTextColor={C.zinc400} value={name} onChangeText={setName} autoCapitalize="words" returnKeyType="next" />
+                  <User size={18} color={"#A1A1AA"} style={s.inputIcon} />
+                  <TextInput style={s.input} placeholder="Full name" placeholderTextColor={"#A1A1AA"} value={name} onChangeText={setName} autoCapitalize="words" returnKeyType="next" />
                 </View>
               )}
 
               <View style={s.inputWrap}>
-                <EnvelopeSimple size={18} color={C.zinc400} style={s.inputIcon} />
-                <TextInput style={s.input} placeholder="Email address" placeholderTextColor={C.zinc400} value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" autoCorrect={false} returnKeyType="next" />
+                <EnvelopeSimple size={18} color={"#A1A1AA"} style={s.inputIcon} />
+                <TextInput style={s.input} placeholder="Email address" placeholderTextColor={"#A1A1AA"} value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" autoCorrect={false} returnKeyType="next" />
               </View>
 
               <View style={s.inputWrap}>
-                <Lock size={18} color={C.zinc400} style={s.inputIcon} />
-                <TextInput style={[s.input, { flex: 1 }]} placeholder="Password" placeholderTextColor={C.zinc400} value={password} onChangeText={setPassword} secureTextEntry={!showPw} returnKeyType="done" onSubmitEditing={handle} />
+                <Lock size={18} color={"#A1A1AA"} style={s.inputIcon} />
+                <TextInput style={[s.input, { flex: 1 }]} placeholder="Password" placeholderTextColor={"#A1A1AA"} value={password} onChangeText={setPassword} secureTextEntry={!showPw} returnKeyType="done" onSubmitEditing={handle} />
                 <TouchableOpacity onPress={() => setShowPw(!showPw)} style={s.eyeBtn}>
-                  {showPw ? <EyeSlash size={18} color={C.zinc400} /> : <Eye size={18} color={C.zinc400} />}
+                  {showPw ? <EyeSlash size={18} color={"#A1A1AA"} /> : <Eye size={18} color={"#A1A1AA"} />}
                 </TouchableOpacity>
               </View>
 
@@ -292,7 +277,7 @@ export default function AuthScreen() {
               {!!successMsg && <View style={s.successWrap}><Text style={s.successText}>{successMsg}</Text></View>}
 
               <TouchableOpacity style={s.submitBtn} onPress={handle} activeOpacity={0.85} disabled={isLoading}>
-                <LinearGradient colors={[C.indigo, C.indigoDark]} style={StyleSheet.absoluteFillObject} />
+                <LinearGradient colors={["#6366F1", "#4F46E5"]} style={StyleSheet.absoluteFillObject} />
                 {isLoading
                   ? <ActivityIndicator color="#fff" size="small" />
                   : <Text style={s.submitText}>{mode === "login" ? "Sign In" : "Create Account"}</Text>}
@@ -310,32 +295,32 @@ export default function AuthScreen() {
 }
 
 const s = StyleSheet.create({
-  root: { flex: 1, backgroundColor: C.bg },
+  root: { flex: 1, backgroundColor: "#09090B" },
   safe: { flex: 1 },
   glow: { position: "absolute", top: -100, left: W / 2 - 200, width: 400, height: 400 },
   scroll: { flexGrow: 1, justifyContent: "center", paddingHorizontal: 24, paddingVertical: 32, gap: 24 },
   logoWrap: { alignItems: "center", gap: 10, marginBottom: 8 },
-  logoCircle: { width: 72, height: 72, borderRadius: 24, alignItems: "center", justifyContent: "center", shadowColor: C.indigo, shadowOpacity: 0.5, shadowRadius: 20, shadowOffset: { width: 0, height: 6 }, elevation: 10 },
-  appName: { fontSize: 32, fontWeight: "900", color: C.text, letterSpacing: -1 },
-  tagline: { fontSize: 14, color: C.textMuted },
-  card: { backgroundColor: "rgba(24,24,27,0.7)", borderRadius: 20, padding: 24, gap: 14, borderWidth: 1, borderColor: C.border },
+  logoCircle: { width: 72, height: 72, borderRadius: 24, alignItems: "center", justifyContent: "center", shadowColor: "#6366F1", shadowOpacity: 0.5, shadowRadius: 20, shadowOffset: { width: 0, height: 6 }, elevation: 10 },
+  appName: { fontSize: 32, fontWeight: "900", color: "#FAFAFA", letterSpacing: -1 },
+  tagline: { fontSize: 14, color: "#A1A1AA" },
+  card: { backgroundColor: "rgba(24,24,27,0.7)", borderRadius: 20, padding: 24, gap: 14, borderWidth: 1, borderColor: "rgba(63,63,70,0.6)" },
   modeRow: { flexDirection: "row", backgroundColor: "rgba(9,9,11,0.6)", borderRadius: 12, padding: 4, gap: 4 },
   modeBtn: { flex: 1, paddingVertical: 10, borderRadius: 9, alignItems: "center" },
-  modeBtnActive: { backgroundColor: C.indigo },
-  modeBtnText: { fontSize: 14, fontWeight: "600", color: C.zinc400 },
+  modeBtnActive: { backgroundColor: "#6366F1" },
+  modeBtnText: { fontSize: 14, fontWeight: "600", color: "#A1A1AA" },
   modeBtnTextActive: { color: "#fff" },
-  cardTitle: { fontSize: 22, fontWeight: "800", color: C.text, letterSpacing: -0.3, marginTop: 4 },
-  cardSub: { fontSize: 13, color: C.textMuted, marginBottom: 4 },
-  inputWrap: { flexDirection: "row", alignItems: "center", backgroundColor: "rgba(9,9,11,0.6)", borderRadius: 12, borderWidth: 1, borderColor: C.border, paddingHorizontal: 14, height: 52, gap: 10 },
+  cardTitle: { fontSize: 22, fontWeight: "800", color: "#FAFAFA", letterSpacing: -0.3, marginTop: 4 },
+  cardSub: { fontSize: 13, color: "#A1A1AA", marginBottom: 4 },
+  inputWrap: { flexDirection: "row", alignItems: "center", backgroundColor: "rgba(9,9,11,0.6)", borderRadius: 12, borderWidth: 1, borderColor: "rgba(63,63,70,0.6)", paddingHorizontal: 14, height: 52, gap: 10 },
   inputIcon: {},
-  input: { flex: 1, color: C.text, fontSize: 15 },
+  input: { flex: 1, color: "#FAFAFA", fontSize: 15 },
   eyeBtn: { padding: 4 },
-  forgotLink: { color: C.indigo, fontSize: 13, fontWeight: "500", textAlign: "center", paddingVertical: 4 },
+  forgotLink: { color: "#6366F1", fontSize: 13, fontWeight: "500", textAlign: "center", paddingVertical: 4 },
   errorWrap: { backgroundColor: "rgba(244,63,94,0.1)", borderRadius: 10, padding: 12, borderWidth: 1, borderColor: "rgba(244,63,94,0.3)" },
-  errorText: { color: C.error, fontSize: 13, fontWeight: "500" },
+  errorText: { color: "#F43F5E", fontSize: 13, fontWeight: "500" },
   successWrap: { backgroundColor: "rgba(34,197,94,0.1)", borderRadius: 10, padding: 12, borderWidth: 1, borderColor: "rgba(34,197,94,0.3)" },
-  successText: { color: C.success, fontSize: 13, fontWeight: "500" },
-  submitBtn: { height: 52, borderRadius: 14, overflow: "hidden", alignItems: "center", justifyContent: "center", marginTop: 4, shadowColor: C.indigo, shadowOpacity: 0.4, shadowRadius: 16, shadowOffset: { width: 0, height: 4 }, elevation: 8 },
+  successText: { color: "#22C55E", fontSize: 13, fontWeight: "500" },
+  submitBtn: { height: 52, borderRadius: 14, overflow: "hidden", alignItems: "center", justifyContent: "center", marginTop: 4, shadowColor: "#6366F1", shadowOpacity: 0.4, shadowRadius: 16, shadowOffset: { width: 0, height: 4 }, elevation: 8 },
   submitText: { color: "#fff", fontSize: 16, fontWeight: "700", letterSpacing: 0.2 },
   footer: { textAlign: "center", fontSize: 12, color: "#52525B" },
 

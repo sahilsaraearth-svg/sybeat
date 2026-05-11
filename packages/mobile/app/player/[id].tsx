@@ -387,8 +387,8 @@ export default function PlayerScreen() {
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <>
-      <Text style={a.infoLabel}>{label}</Text>
-      <Text style={a.infoVal}>{value}</Text>
+      <Text style={artistStyles.infoLabel}>{label}</Text>
+      <Text style={artistStyles.infoVal}>{value}</Text>
     </>
   );
 }
@@ -489,7 +489,7 @@ function makeStyles(C: ReturnType<typeof import("../../lib/colors").useColors>) 
   radioLabelActive: {
     color: "#6366F1",
   },
-});
+}); }
 
 // Artist section styles
 const artistStyles = StyleSheet.create({
