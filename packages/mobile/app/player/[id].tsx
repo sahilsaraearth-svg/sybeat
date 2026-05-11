@@ -43,6 +43,7 @@ const WAVE = [0.3,0.5,0.4,0.8,0.6,0.9,0.7,0.5,1,0.8,0.6,0.4,0.7,0.9,0.5,0.3,0.6,
 export default function PlayerScreen() {
   const C = useColors();
   const s = useMemo(() => makeStyles(C), [C]);
+  const a = artistStyles;
   const router = useRouter();
   const goBack = () => router.canGoBack() ? router.back() : router.replace("/(tabs)" as any);
 
@@ -491,7 +492,7 @@ function makeStyles(C: ReturnType<typeof import("../../lib/colors").useColors>) 
 });
 
 // Artist section styles
-const a = StyleSheet.create({
+const artistStyles = StyleSheet.create({
   divider: {
     flexDirection: "row", alignItems: "center",
     paddingHorizontal: 20, marginTop: 16, marginBottom: 20, gap: 10,
@@ -576,4 +577,4 @@ const a = StyleSheet.create({
     width: 52, height: 52, borderRadius: 26, overflow: "hidden",
     alignItems: "center", justifyContent: "center",
   },
-}); }
+});
