@@ -66,7 +66,7 @@
       "expo-web-browser"
     ],
     "extra": {
-      "apiUrl": "https://xocmldcvhkwr3gsvbfkyz-preview-4200.runable.site/",
+      "apiUrl": "https://templateserver-production.up.railway.app",
       "router": {},
       "eas": {
         "projectId": "07005c4d-0810-4f12-ad77-13b9c7820197"
