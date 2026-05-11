@@ -1,4 +1,7 @@
 {
+  "cli": {
+    "version": ">= 12.0.0"
+  },
   "build": {
     "development": {
       "developmentClient": true,
@@ -6,19 +9,9 @@
     },
     "preview": {
       "android": {
-        "buildType": "apk",
-        "gradleCommand": ":app:assembleRelease",
-        "env": {
-          "KOTLIN_VERSION": "1.9.24"
-        }
+        "buildType": "apk"
       }
     },
-    "production": {
-      "android": {
-        "env": {
-          "KOTLIN_VERSION": "1.9.24"
-        }
-      }
-    }
+    "production": {}
   }
 }
