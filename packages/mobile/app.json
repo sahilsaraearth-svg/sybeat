@@ -23,7 +23,8 @@
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#0A0A0A"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "kotlinVersion": "1.9.24"
     },
     "web": {
       "favicon": "./assets/favicon.png",

@@ -4,7 +4,21 @@
       "developmentClient": true,
       "distribution": "internal"
     },
-    "preview": {},
-    "production": {}
+    "preview": {
+      "android": {
+        "buildType": "apk",
+        "gradleCommand": ":app:assembleRelease",
+        "env": {
+          "KOTLIN_VERSION": "1.9.24"
+        }
+      }
+    },
+    "production": {
+      "android": {
+        "env": {
+          "KOTLIN_VERSION": "1.9.24"
+        }
+      }
+    }
   }
 }
