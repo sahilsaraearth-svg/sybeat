@@ -1,0 +1,50 @@
+{
+  "expo": {
+    "name": "Sybeat",
+    "slug": "sybeat",
+    "version": "1.0.0",
+    "scheme": "sybeat",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#0A0A0A"
+    },
+    "ios": {
+      "bundleIdentifier": "com.sybeat_k7m2.runable",
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.sybeat_k7m2.runable",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#0A0A0A"
+      },
+      "edgeToEdgeEnabled": true
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-av",
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow Sybeat to save track share cards to your gallery.",
+          "savePhotosPermission": "Allow Sybeat to save images to your gallery.",
+          "isAccessMediaLocationEnabled": true
+        }
+      ],
+      "expo-audio",
+      "expo-web-browser"
+    ],
+    "extra": {
+      "apiUrl": "https://xocmldcvhkwr3gsvbfkyz-preview-4200.runable.site/"
+    }
+  }
+}

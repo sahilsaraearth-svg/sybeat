@@ -1,0 +1,12 @@
+node_modules/
+.expo/
+dist/
+build/
+.env
+.env.local
+*.log
+.DS_Store
+packages/mobile/.expo/
+packages/mobile/node_modules/
+packages/web/node_modules/
+packages/server/node_modules/
