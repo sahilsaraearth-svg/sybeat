@@ -5,7 +5,7 @@ import type { AppType } from "@template/web";
 const baseUrl =
   Constants.expoConfig?.extra?.apiUrl ??
   process.env.EXPO_PUBLIC_API_URL ??
-  "https://salad-lunch-sheffield-anthropology.trycloudflare.com";
+  "https://templateserver-production.up.railway.app";
 
 const client = hc<AppType>(baseUrl);
 export const api = client.api;

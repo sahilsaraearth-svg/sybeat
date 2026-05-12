@@ -4,7 +4,7 @@ import { toast } from "../components/Toast";
 
 export const API_BASE =
   process.env.EXPO_PUBLIC_API_URL ??
-  "https://build-special-lime-finder.trycloudflare.com";
+  "https://templateserver-production.up.railway.app";
 
 let _nativeSound: any = null;
 let _nextNativeSound: any = null;          // pre-buffered next track
