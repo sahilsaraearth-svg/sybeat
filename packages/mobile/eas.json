@@ -10,11 +10,8 @@
     "preview": {
       "android": {
         "buildType": "apk"
-      },
-      "preBuildCommand": "bash patch-rntp.sh"
+      }
     },
-    "production": {
-      "preBuildCommand": "bash patch-rntp.sh"
-    }
+    "production": {}
   }
 }
