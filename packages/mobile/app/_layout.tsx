@@ -5,7 +5,6 @@ import { StatusBar } from "expo-status-bar";
 import { View } from "react-native";
 import { useEffect } from "react";
 import { initAudio } from "../lib/player";
-import { Platform } from "react-native";
 import { useAuthStore } from "../store/authStore";
 import { ToastProvider } from "../components/Toast";
 import { useRecentStore } from "../store/recentStore";
@@ -73,12 +72,6 @@ function ThemedApp() {
 
 export default function RootLayout() {
   useEffect(() => {
-    if (Platform.OS !== "web") {
-      import("react-native-track-player").then((mod) => {
-        const TrackPlayer = mod.default ?? mod;
-        TrackPlayer.registerPlaybackService(() => require("../service"));
-      }).catch(() => {});
-    }
     initAudio();
     useRecentStore.getState().hydrate();
     useSearchHistoryStore.getState().hydrate();
