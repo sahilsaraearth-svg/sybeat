@@ -63,7 +63,13 @@
         }
       ],
       "expo-audio",
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "react-native-track-player",
+        {
+          "iosBackgroundMode": true
+        }
+      ]
     ],
     "extra": {
       "apiUrl": "https://templateserver-production.up.railway.app",
