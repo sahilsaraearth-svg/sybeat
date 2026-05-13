@@ -1,0 +1,33 @@
+diff --git a/android/src/main/java/com/doublesymmetry/trackplayer/module/MusicModule.kt b/android/src/main/java/com/doublesymmetry/trackplayer/module/MusicModule.kt
+index 1234567..abcdefg 100644
+--- a/android/src/main/java/com/doublesymmetry/trackplayer/module/MusicModule.kt
++++ b/android/src/main/java/com/doublesymmetry/trackplayer/module/MusicModule.kt
+@@ -545,7 +545,7 @@
+         if (verifyServiceBoundOrReject(callback)) return@launch
+ 
+         if (index >= 0 && index < musicService.tracks.size) {
+-            callback.resolve(Arguments.fromBundle(musicService.tracks[index].originalItem))
++            val item = musicService.tracks[index].originalItem; callback.resolve(if (item != null) Arguments.fromBundle(item) else null)
+         } else {
+             callback.resolve(null)
+         }
+@@ -555,7 +555,7 @@
+     fun getQueue(callback: Promise) = scope.launch {
+         if (verifyServiceBoundOrReject(callback)) return@launch
+ 
+-        callback.resolve(Arguments.fromList(musicService.tracks.map { it.originalItem }))
++        callback.resolve(Arguments.fromList(musicService.tracks.map { t -> t.originalItem?.let { Arguments.fromBundle(it) } }))
+     }
+ 
+     @ReactMethod
+@@ -584,9 +584,7 @@
+         if (verifyServiceBoundOrReject(callback)) return@launch
+         callback.resolve(
+             if (musicService.tracks.isEmpty()) null
+-            else Arguments.fromBundle(
+-                musicService.tracks[musicService.getCurrentTrackIndex()].originalItem
+-            )
++            else musicService.tracks[musicService.getCurrentTrackIndex()].originalItem?.let { Arguments.fromBundle(it) }
+         )
+     }
+ 

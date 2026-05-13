@@ -6,13 +6,10 @@ export const API_BASE =
   process.env.EXPO_PUBLIC_API_URL ??
   "https://templateserver-production.up.railway.app";
 
-let _nativeSound: any = null;
-let _nextNativeSound: any = null;          // pre-buffered next track
-let _nextNativeSongId: string | null = null; // which song is pre-buffered
 let _webPlayer: HTMLAudioElement | null = null;
 let _crossfadeTimer: ReturnType<typeof setInterval> | null = null;
-let _loadingTrackId: string | null = null; // prevent double-load
-let _audioModeSet = false;                  // only set AudioMode once
+let _loadingTrackId: string | null = null;
+let _rntp_initialized = false;
 
 // ─── Client-side URL cache ────────────────────────────────────────────────────
 interface UrlCacheEntry { url: string; expiresAt: number }
@@ -60,15 +57,13 @@ export async function fetchAndAppendRadio(seedTrack: {
   album?: string;
 }) {
   const store = usePlayerStore.getState();
-  if (store.isFetchingRadio) return; // already in flight
+  if (store.isFetchingRadio) return;
   store.setIsFetchingRadio(true);
 
   try {
     const { videoId, title, artist, language, album } = seedTrack;
     const recentIds = store.playedInSession.slice(-20);
     const skipCount = store.skipCount;
-
-    // Build liked artists list from recently played (tracks not skipped = liked artist)
     const likedArtists = artist ? [artist] : [];
 
     const res = await fetch(`${API_BASE}/api/radio/${videoId}`, {
@@ -89,7 +84,6 @@ export async function fetchAndAppendRadio(seedTrack: {
     const tracks = await res.json();
 
     if (Array.isArray(tracks) && tracks.length > 0) {
-      // Convert SaavnTrack → YouTubeTrack shape (same fields, videoId = id)
       const mapped = tracks.map((t: any) => ({
         id: t.id,
         videoId: t.id,
@@ -111,13 +105,13 @@ export async function fetchAndAppendRadio(seedTrack: {
   }
 }
 
-// ─── Pre-warm: fire on touch/press-in ─────────────────────────────────────────
+// ─── Pre-warm ────────────────────────────────────────────────────────────────
 export function prewarmTrack(songId: string) {
   fetch(`${API_BASE}/api/stream/${songId}/warm`).catch(() => {});
   resolveAudioUrl(songId).catch(() => {});
 }
 
-// ─── Prefetch next N tracks URLs silently ────────────────────────────────────
+// ─── Prefetch next N tracks ───────────────────────────────────────────────────
 export function prefetchQueue(songIds: string[]) {
   if (!songIds.length) return;
   const ids = songIds.filter((id) => !getClientCached(id)).slice(0, 3);
@@ -132,78 +126,65 @@ export function prefetchQueue(songIds: string[]) {
   );
 }
 
-// ─── Pre-buffer next native Sound object ─────────────────────────────────────
-// Called after current track starts playing — loads next track in background
-// so pressing next is instant (no createAsync wait).
-async function _prebufferNext(songId: string) {
-  if (Platform.OS === "web") return;
-  if (_nextNativeSongId === songId) return; // already buffered
-
-  // Clean up any stale pre-buffer
-  if (_nextNativeSound) {
-    try { await _nextNativeSound.unloadAsync(); } catch {}
-    _nextNativeSound = null;
-    _nextNativeSongId = null;
-  }
-
-  try {
-    const { Audio } = await import("expo-av");
-    const pipeUrl = `${API_BASE}/api/stream/${songId}`;
-
-    const { sound, status } = await Audio.Sound.createAsync(
-      { uri: pipeUrl },
-      { shouldPlay: false, volume: 0, progressUpdateIntervalMillis: 99999 }
-    );
-
-    if (status.isLoaded) {
-      _nextNativeSound = sound;
-      _nextNativeSongId = songId;
-      console.log("[prebuffer] ready:", songId);
-    } else {
-      try { await sound.unloadAsync(); } catch {}
-    }
-  } catch (e) {
-    // silent — prebuffer failure is non-fatal
-    console.log("[prebuffer] failed:", songId);
-  }
-}
-
 // ─── Record skip signal ───────────────────────────────────────────────────────
-// Call this before loading a new track if user skipped current one early
 export function recordSkipIfEarly() {
   const store = usePlayerStore.getState();
   const { currentTrack, position, duration } = store;
   if (!currentTrack) return;
   const pct = duration > 0 ? position / duration : 0;
   if (pct < 0.3) {
-    // User skipped within first 30% — negative signal
     store.recordSkip(currentTrack.videoId);
   }
 }
 
-// ─── Also prefetch radio when queue is getting low ────────────────────────────
+// ─── Radio prefetch check ────────────────────────────────────────────────────
 export function checkAndPrefetchRadio() {
   const store = usePlayerStore.getState();
   const { queue, queueIndex, radioMode, currentTrack, isFetchingRadio } = store;
   const remaining = queue.length - queueIndex - 1;
-  // When only 2 tracks left in queue, start fetching radio tracks proactively
   if (radioMode && !isFetchingRadio && remaining <= 2 && currentTrack) {
     fetchAndAppendRadio(currentTrack as any);
+  }
+}
+
+// ─── Init RNTP ────────────────────────────────────────────────────────────────
+async function initRNTP() {
+  if (_rntp_initialized) return;
+  try {
+    const TrackPlayer = (await import("react-native-track-player")).default;
+    const { Capability, RepeatMode } = await import("react-native-track-player");
+    await TrackPlayer.setupPlayer({
+      waitForBuffer: true,
+    });
+    await TrackPlayer.updateOptions({
+      capabilities: [
+        Capability.Play,
+        Capability.Pause,
+        Capability.SkipToNext,
+        Capability.SkipToPrevious,
+        Capability.SeekTo,
+        Capability.Stop,
+      ],
+      compactCapabilities: [
+        Capability.Play,
+        Capability.Pause,
+        Capability.SkipToNext,
+        Capability.SkipToPrevious,
+      ],
+      progressUpdateEventThrottle: 1000,
+    });
+    await TrackPlayer.setRepeatMode(RepeatMode.Off);
+    _rntp_initialized = true;
+    console.log("[RNTP] initialized");
+  } catch (e: any) {
+    console.warn("[RNTP] init failed:", e?.message);
   }
 }
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
 export async function initAudio() {
   if (Platform.OS !== "web") {
-    const { Audio } = await import("expo-av");
-    await Audio.setAudioModeAsync({
-      allowsRecordingIOS: false,
-      staysActiveInBackground: true,
-      playsInSilentModeIOS: true,
-      shouldDuckAndroid: true,
-      playThroughEarpieceAndroid: false,
-    });
-    _audioModeSet = true;
+    await initRNTP();
   }
 }
 
@@ -211,9 +192,7 @@ export async function initAudio() {
 export async function loadAndPlay(songId: string) {
   if (_loadingTrackId === songId) return;
 
-  // Record skip if user is changing track early
   recordSkipIfEarly();
-
   _loadingTrackId = songId;
 
   const store = usePlayerStore.getState();
@@ -228,23 +207,113 @@ export async function loadAndPlay(songId: string) {
       await _loadWebAudio(`${API_BASE}/api/stream/${songId}`, "audio/mp4", store);
     }
   } else {
-    await _loadNativeAudio(songId, store);
+    await _loadRNTPAudio(songId, store);
   }
 
   _loadingTrackId = null;
 
-  // Kick off prefetch for next tracks URLs + pre-buffer the very next one
   const { queue, queueIndex } = usePlayerStore.getState();
   const nextIds = queue.slice(queueIndex + 1, queueIndex + 4).map((t) => t.videoId);
   prefetchQueue(nextIds);
-
-  // Pre-buffer the next track in background (after 2s to not compete with current)
-  if (nextIds[0]) {
-    setTimeout(() => _prebufferNext(nextIds[0]), 2000);
-  }
-
-  // Proactively fetch radio tracks when queue is getting low (after 3s)
   setTimeout(() => checkAndPrefetchRadio(), 3000);
+}
+
+// ─── RNTP native audio ────────────────────────────────────────────────────────
+async function _loadRNTPAudio(
+  songId: string,
+  store: ReturnType<typeof usePlayerStore.getState>
+) {
+  try {
+    if (!_rntp_initialized) {
+      await initRNTP();
+    }
+
+    const TrackPlayer = (await import("react-native-track-player")).default;
+    const { State } = await import("react-native-track-player");
+
+    // Get current track info from store
+    const currentTrack = store.currentTrack;
+    const pipeUrl = `${API_BASE}/api/stream/${songId}`;
+
+    // Build RNTP track object
+    const track = {
+      id: songId,
+      url: pipeUrl,
+      title: currentTrack?.title ?? "Unknown",
+      artist: currentTrack?.artist ?? "Unknown",
+      artwork: currentTrack?.thumbnail ?? undefined,
+      duration: currentTrack?.durationSecs ?? undefined,
+    };
+
+    // Reset and add new track
+    await TrackPlayer.reset();
+    await TrackPlayer.add(track);
+    await TrackPlayer.play();
+
+    store.setIsLoading(false);
+    store.setIsPlaying(true);
+
+    // Poll RNTP for position/state updates
+    _startRNTPPolling(store);
+
+    console.log("[RNTP] playing:", songId);
+  } catch (err: any) {
+    const msg = err?.message ?? String(err);
+    console.error("[RNTP] load error:", msg);
+    toast.error(`Audio error: ${msg.slice(0, 80)}`);
+    store.setIsLoading(false);
+    store.setIsPlaying(false);
+  }
+}
+
+// ─── RNTP polling for position/state ─────────────────────────────────────────
+let _pollTimer: any = null;
+
+function _startRNTPPolling(store: ReturnType<typeof usePlayerStore.getState>) {
+  if (_pollTimer) clearInterval(_pollTimer);
+
+  _pollTimer = setInterval(async () => {
+    try {
+      const TrackPlayer = (await import("react-native-track-player")).default;
+      const { State } = await import("react-native-track-player");
+
+      const state = await TrackPlayer.getPlaybackState();
+      const pos = await TrackPlayer.getProgress();
+
+      store.setPosition(Math.floor(pos.position));
+      if (pos.duration > 0) store.setDuration(Math.floor(pos.duration));
+
+      const isPlaying = state.state === State.Playing;
+      const isBuffering = state.state === State.Buffering || state.state === State.Loading;
+
+      store.setIsPlaying(isPlaying);
+      if (isBuffering) store.setIsLoading(true);
+      else store.setIsLoading(false);
+
+      // Track finished
+      if (state.state === State.Ended || (pos.duration > 0 && pos.position >= pos.duration - 0.5)) {
+        clearInterval(_pollTimer);
+        _pollTimer = null;
+
+        const ct = usePlayerStore.getState().currentTrack;
+        if (ct) usePlayerStore.getState().recordPlayed(ct.videoId);
+
+        const next = store.nextTrack();
+        if (next) {
+          loadAndPlay(next.videoId);
+        } else if (usePlayerStore.getState().radioMode && ct) {
+          fetchAndAppendRadio(ct as any).then(() => {
+            const n = usePlayerStore.getState().nextTrack();
+            if (n) loadAndPlay(n.videoId);
+            else { store.setIsPlaying(false); store.setPosition(0); }
+          });
+        } else {
+          store.setIsPlaying(false);
+          store.setPosition(0);
+        }
+      }
+    } catch (_) {}
+  }, 1000);
 }
 
 // ─── Web audio ────────────────────────────────────────────────────────────────
@@ -299,7 +368,6 @@ async function _loadWebAudio(
     });
     audio.addEventListener("ended", () => {
       store.setIsPlaying(false);
-      // Record that this track was played (for radio signal)
       const ct = usePlayerStore.getState().currentTrack;
       if (ct) store.recordPlayed(ct.videoId);
 
@@ -307,7 +375,6 @@ async function _loadWebAudio(
       if (next) {
         loadAndPlay(next.videoId);
       } else if (usePlayerStore.getState().radioMode && ct) {
-        // Queue exhausted + radio mode on → fetch more songs then play
         fetchAndAppendRadio(ct as any).then(() => {
           const n = usePlayerStore.getState().nextTrack();
           if (n) loadAndPlay(n.videoId);
@@ -342,24 +409,7 @@ async function _loadWebAudio(
   }
 }
 
-// ─── Crossfade helpers ────────────────────────────────────────────────────────
-async function _fadeOutNative(sound: any, fromVol: number, durationMs: number): Promise<void> {
-  return new Promise((resolve) => {
-    const steps = 20;
-    const stepMs = durationMs / steps;
-    const stepVol = fromVol / steps;
-    let vol = fromVol;
-    let count = 0;
-    const iv = setInterval(async () => {
-      count++;
-      vol = Math.max(0, fromVol - stepVol * count);
-      try { await sound.setVolumeAsync(vol); } catch {}
-      if (count >= steps) { clearInterval(iv); resolve(); }
-    }, stepMs);
-    _crossfadeTimer = iv;
-  });
-}
-
+// ─── Crossfade helper ─────────────────────────────────────────────────────────
 function _fadeOutWeb(audio: HTMLAudioElement, fromVol: number, durationMs: number): Promise<void> {
   return new Promise((resolve) => {
     const steps = 20;
@@ -377,122 +427,6 @@ function _fadeOutWeb(audio: HTMLAudioElement, fromVol: number, durationMs: numbe
   });
 }
 
-// ─── Native audio ─────────────────────────────────────────────────────────────
-async function _loadNativeAudio(
-  songId: string,
-  store: ReturnType<typeof usePlayerStore.getState>
-) {
-  try {
-    const { Audio } = await import("expo-av");
-
-    // Set audio mode only once per app session
-    if (!_audioModeSet) {
-      try {
-        await Audio.setAudioModeAsync({
-          allowsRecordingIOS: false,
-          staysActiveInBackground: true,
-          playsInSilentModeIOS: true,
-          shouldDuckAndroid: true,
-          playThroughEarpieceAndroid: false,
-        });
-        _audioModeSet = true;
-      } catch (modeErr: any) {
-        console.warn("[native] setAudioMode failed:", modeErr?.message);
-      }
-    }
-
-    // Unload previous sound
-    if (_crossfadeTimer) { clearInterval(_crossfadeTimer); _crossfadeTimer = null; }
-    if (_nativeSound) {
-      const cfSecs = store.crossfadeDuration;
-      if (cfSecs > 0) {
-        try { await _fadeOutNative(_nativeSound, store.volume, cfSecs * 1000); } catch {}
-      }
-      try { await _nativeSound.unloadAsync(); } catch {}
-      _nativeSound = null;
-    }
-
-    let sound: any;
-
-    // Use pre-buffered sound if available for this track — instant playback
-    if (_nextNativeSongId === songId && _nextNativeSound) {
-      console.log("[native] using prebuffered sound for:", songId);
-      sound = _nextNativeSound;
-      _nextNativeSound = null;
-      _nextNativeSongId = null;
-
-      // Set volume and play
-      try { await sound.setVolumeAsync(store.volume); } catch {}
-      await sound.playAsync();
-    } else {
-      // Cold load — show loading state, create from scratch
-      console.log("[native] cold load:", songId);
-      const pipeUrl = `${API_BASE}/api/stream/${songId}`;
-
-      const result = await Audio.Sound.createAsync(
-        { uri: pipeUrl },
-        { shouldPlay: true, volume: store.volume, progressUpdateIntervalMillis: 500 }
-      );
-
-      if (!result.status.isLoaded) {
-        const errMsg = (result.status as any).error ?? "unknown";
-        toast.error(`Playback failed: ${errMsg}`);
-        store.setIsLoading(false);
-        store.setIsPlaying(false);
-        return;
-      }
-
-      sound = result.sound;
-    }
-
-    _nativeSound = sound;
-
-    // Status callback for position, finish, etc.
-    sound.setOnPlaybackStatusUpdate((status: any) => {
-      if (!status.isLoaded) {
-        if (status.error) {
-          console.error("[native] status error:", status.error);
-          toast.error(`Audio error: ${status.error}`);
-        }
-        return;
-      }
-      store.setPosition(Math.floor((status.positionMillis ?? 0) / 1000));
-      if (status.durationMillis) store.setDuration(Math.floor(status.durationMillis / 1000));
-      store.setIsLoading(false);
-      if (status.isPlaying !== undefined) store.setIsPlaying(status.isPlaying);
-      if (status.didJustFinish) {
-        // Record played track for radio signal
-        const ct = usePlayerStore.getState().currentTrack;
-        if (ct) usePlayerStore.getState().recordPlayed(ct.videoId);
-
-        const next = store.nextTrack();
-        if (next) {
-          loadAndPlay(next.videoId);
-        } else if (usePlayerStore.getState().radioMode && ct) {
-          // Queue exhausted + radio on → fetch more songs then play
-          fetchAndAppendRadio(ct as any).then(() => {
-            const n = usePlayerStore.getState().nextTrack();
-            if (n) loadAndPlay(n.videoId);
-            else { store.setIsPlaying(false); store.setPosition(0); }
-          });
-        } else {
-          store.setIsPlaying(false);
-          store.setPosition(0);
-        }
-      }
-    });
-
-    store.setIsLoading(false);
-    store.setIsPlaying(true);
-  } catch (err: any) {
-    const msg = err?.message ?? String(err);
-    console.error("[native audio error]", msg);
-    toast.error(`Audio error: ${msg.slice(0, 80)}`);
-    store.setIsLoading(false);
-    store.setIsPlaying(false);
-  }
-}
-
 // ─── Controls ─────────────────────────────────────────────────────────────────
 export async function togglePlayPause() {
   const store = usePlayerStore.getState();
@@ -505,13 +439,19 @@ export async function togglePlayPause() {
       store.setIsPlaying(false);
     }
   } else {
-    if (!_nativeSound) return;
-    if (store.isPlaying) {
-      await _nativeSound.pauseAsync();
-      store.setIsPlaying(false);
-    } else {
-      await _nativeSound.playAsync();
-      store.setIsPlaying(true);
+    try {
+      const TrackPlayer = (await import("react-native-track-player")).default;
+      const { State } = await import("react-native-track-player");
+      const state = await TrackPlayer.getPlaybackState();
+      if (state.state === State.Playing) {
+        await TrackPlayer.pause();
+        store.setIsPlaying(false);
+      } else {
+        await TrackPlayer.play();
+        store.setIsPlaying(true);
+      }
+    } catch (e) {
+      console.warn("[RNTP] togglePlayPause error:", e);
     }
   }
 }
@@ -521,8 +461,13 @@ export async function seekTo(seconds: number) {
     if (!_webPlayer) return;
     try { _webPlayer.currentTime = seconds; usePlayerStore.getState().setPosition(seconds); } catch {}
   } else {
-    if (!_nativeSound) return;
-    try { await _nativeSound.setPositionAsync(seconds * 1000); usePlayerStore.getState().setPosition(seconds); } catch {}
+    try {
+      const TrackPlayer = (await import("react-native-track-player")).default;
+      await TrackPlayer.seekTo(seconds);
+      usePlayerStore.getState().setPosition(seconds);
+    } catch (e) {
+      console.warn("[RNTP] seekTo error:", e);
+    }
   }
 }
 
@@ -531,25 +476,29 @@ export async function setVolumeLevel(vol: number) {
   if (Platform.OS === "web") {
     if (_webPlayer) _webPlayer.volume = vol;
   } else {
-    if (_nativeSound) await _nativeSound.setVolumeAsync(vol);
+    try {
+      const TrackPlayer = (await import("react-native-track-player")).default;
+      await TrackPlayer.setVolume(vol);
+    } catch (e) {
+      console.warn("[RNTP] setVolume error:", e);
+    }
   }
 }
 
 export async function stopPlayer() {
+  if (_pollTimer) { clearInterval(_pollTimer); _pollTimer = null; }
+
   if (Platform.OS === "web") {
     if (_webPlayer) {
       try { _webPlayer.pause(); _webPlayer.src = ""; _webPlayer.load(); } catch {}
       _webPlayer = null;
     }
   } else {
-    if (_nativeSound) {
-      try { await _nativeSound.unloadAsync(); } catch {}
-      _nativeSound = null;
-    }
-    if (_nextNativeSound) {
-      try { await _nextNativeSound.unloadAsync(); } catch {}
-      _nextNativeSound = null;
-      _nextNativeSongId = null;
+    try {
+      const TrackPlayer = (await import("react-native-track-player")).default;
+      await TrackPlayer.reset();
+    } catch (e) {
+      console.warn("[RNTP] stopPlayer error:", e);
     }
   }
   usePlayerStore.getState().clearPlayer();
