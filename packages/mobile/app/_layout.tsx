@@ -2,7 +2,7 @@ import { Stack, useRouter, useSegments } from "expo-router";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StatusBar } from "expo-status-bar";
-import { View, Platform } from "react-native";
+import { View } from "react-native";
 import { useEffect } from "react";
 import { initAudio } from "../lib/player";
 import { useAuthStore } from "../store/authStore";
@@ -72,12 +72,6 @@ function ThemedApp() {
 
 export default function RootLayout() {
   useEffect(() => {
-    if (Platform.OS !== "web") {
-      // Register RNTP playback service for media notification controls
-      const { PlaybackService } = require("../service");
-      const TrackPlayer = require("react-native-track-player").default;
-      TrackPlayer.registerPlaybackService(() => PlaybackService);
-    }
     initAudio();
     useRecentStore.getState().hydrate();
     useSearchHistoryStore.getState().hydrate();
